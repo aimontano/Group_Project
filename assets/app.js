@@ -114,7 +114,7 @@ $(document).on('click', '#logout', e => {
 	e.preventDefault();
 
 	auth.signOut();
-	window.location.href = './login.html';
+	window.location.href = './index.html';
 })
 
 // Checks user state
