@@ -37,6 +37,9 @@ const userExist = userEmail => {
 	usersRef.orderByChild('email').equalTo(userEmail).once('child_added', snap => {
 		if(snap.val()){
 			console.log("User exists");
+			$('#main-content').load('./templates/profile.html', () =>{
+				$('#userInfo').text(snap.val().userName + " " + snap.val().lastName);
+			});
 		} else {
 			console.log("User doesn't exist");
 		}
@@ -95,12 +98,19 @@ $(document).on('click', '#btnRegister', e => {
 	registerUser(userName, lastName, currentUserEmail);
 });
 
+$(document).on('click', '#logout', e => {
+	e.preventDefault();
+
+	auth.signOut();
+	window.location.href = './login.html';
+})
+
 // Checks user state
 auth.onAuthStateChanged(user => {
 	if(user) {
 		currentUserEmail = user.email;
 		userExist(currentUserEmail);
-		console.log("Logged In")
+		console.log("Logged In");
 	} else {
 		console.log("Not Logged in");
 	}
