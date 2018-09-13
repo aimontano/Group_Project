@@ -63,10 +63,14 @@ $('#btnLogin').click(e => {
 	let email = $('#userEmail').val().trim();
 	let password = $('#userPassword').val().trim();
 
-	const promise = auth.signInWithEmailAndPassword(email, password);
-	promise.catch(e => {
-		$('#message').text(e.message);
-	});
+	if (email != '' && password != '' ) {
+		const promise = auth.signInWithEmailAndPassword(email, password);
+		promise.catch(e => {
+			$('#message').text(e.message);
+		});
+	} else {
+		alert("You must enter email & password!");
+	}
 
 	// resetInputs();
 });
@@ -78,13 +82,17 @@ $('#btnSignUp').click(e => {
 	let email = $('#userEmail').val().trim();
 	let password = $('#userPassword').val().trim();
 
-	const promise = auth.createUserWithEmailAndPassword(email, password);
-	promise.catch(e => {
-		console.log(e.code)
-		$('#message').text(e.code);
+	if (email != '' && password != '' ) {
+		const promise = auth.createUserWithEmailAndPassword(email, password);
+		promise.catch(e => {
+			console.log(e.code)
+			$('#message').text(e.code);
 
-	});
-	$('#main-content').load('./templates/register.html');
+		});
+		$('#main-content').load('./templates/register.html');
+	} else {
+		alert("You must enter email & password!");
+	}
 	// resetInputs();
 });
 
@@ -95,7 +103,11 @@ $(document).on('click', '#btnRegister', e => {
 	let userName = $('#userName').val().trim();
 	let lastName = $('#lastName').val().trim();
 
-	registerUser(userName, lastName, currentUserEmail);
+	if(userName != '' && lastName != '') {
+		registerUser(userName, lastName, currentUserEmail);
+	} else {
+		alert("You must enter your first and last name");
+	}
 });
 
 $(document).on('click', '#logout', e => {
