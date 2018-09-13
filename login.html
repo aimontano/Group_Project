@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	  <meta charset="utf-8" />
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	  <title>Login</title>
+	  <meta name="viewport" content="width=device-width, initial-scale=1">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	</head>
+	<body>
+		<div class="container mt-5">
+			<div class="row justify-content-md-center">
+				<div class="col-md-6">
+					<h2 class="text-center">Login</h2>
+					<form>
+						<div class="form-group">
+							<label for="userEmail">Email</label>
+							<input type="email" id="userEmail" class="form-control">
+						</div>
+						<div class="form-group">
+							<label for="userPassword">Password</label>
+							<input type="password" id="userPassword" class="form-control">
+						</div>
+						<button class="btn btn-primary" id="btnLogin">Login</button>
+						<button class="btn btn-info" id="btnSignUp">Sign Up</button>
+					</form>					
+				</div>
+			</div>
+		</div>
+
+		<script src="https://www.gstatic.com/firebasejs/5.4.2/firebase.js"></script>
+	  <script src="assets/app.js"></script>
+	</body>
+</html>
