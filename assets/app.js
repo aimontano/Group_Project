@@ -12,22 +12,48 @@ firebase.initializeApp(config);
 const auth = firebase.auth();
 const db = firebase.database();
 
+const usersRef = db.ref('/users');
+
+let currentUserEmail; // stores current logged user
+
+// reset inputs
 const resetInputs = () => {
 	$('#userEmail').val('');
 	$('#userPassword').val('');
 }
 
+// check if user exist through email
 const userExist = userEmail => {
-	db.ref('/users/').once('value').then(snap => {
-		if(snap.val()){
+	// db.ref('/users/').on('child_added', snap => {
+	
 
+	// 	if(snap.val().email == userEmail){
+	// 		console.log("user exist");
+	// 	} else {
+	// 		$('#main-content').load('./templates/register.html');
+	// 		console.log("User not registered!");
+	// 	}
+	// })
+	usersRef.orderByChild('email').equalTo(userEmail).once('child_added', snap => {
+		if(snap.val()){
+			console.log("User exists");
 		} else {
-			// window.location.href = 'https://google.com';
-			console.log("User not registered!");
+			console.log("User doesn't exist");
 		}
 	})
+
 }
 
+// functions registers a users
+const registerUser = (name, lastName, email) => {
+	usersRef.push({
+		userName: name,
+		lastName: lastName,
+		email: email
+	});
+}
+
+// login click handler
 $('#btnLogin').click(e => {
 	e.preventDefault();
 
@@ -35,11 +61,14 @@ $('#btnLogin').click(e => {
 	let password = $('#userPassword').val().trim();
 
 	const promise = auth.signInWithEmailAndPassword(email, password);
-	promise.catch(e => console.log(e.message));
+	promise.catch(e => {
+		$('#message').text(e.message);
+	});
 
 	// resetInputs();
 });
 
+// sign up click handler
 $('#btnSignUp').click(e => {
 	e.preventDefault();
 
@@ -47,16 +76,34 @@ $('#btnSignUp').click(e => {
 	let password = $('#userPassword').val().trim();
 
 	const promise = auth.createUserWithEmailAndPassword(email, password);
-	promise.catch(e => console.log(e.code));
+	promise.catch(e => {
+		console.log(e.code)
+		$('#message').text(e.code);
+
+	});
+	$('#main-content').load('./templates/register.html');
 	// resetInputs();
-})
+});
 
+// register click handler
+$(document).on('click', '#btnRegister', e => {
+	e.preventDefault();
 
+	let userName = $('#userName').val().trim();
+	let lastName = $('#lastName').val().trim();
+
+	registerUser(userName, lastName, currentUserEmail);
+});
+
+// Checks user state
 auth.onAuthStateChanged(user => {
 	if(user) {
-		userExist(user.email);
+		currentUserEmail = user.email;
+		userExist(currentUserEmail);
 		console.log("Logged In")
 	} else {
 		console.log("Not Logged in");
 	}
-})
+});
+
+
