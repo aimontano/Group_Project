@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "donde-chat",
+    "staging": "donde-chat"
+  }
+}

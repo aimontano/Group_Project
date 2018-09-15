@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+  <head>
+    <title>Chat</title>
+    <meta name='viewport' content='initial-scale=1.0'>
+    <meta charset='utf-8'>
+    <!-- jQuery -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+    <!-- moment js  -->
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+    <!-- Firebase -->
+    <script src='https://www.gstatic.com/firebasejs/5.4.2/firebase.js'></script>
+    <script src='https://www.gstatic.com/firebasejs/5.4.1/firebase-app.js'></script>
+    <script src='https://www.gstatic.com/firebasejs/5.4.1/firebase-auth.js'></script>
+    <script src='https://www.gstatic.com/firebasejs/5.4.1/firebase-database.js'></script>
+    <!-- <script src='https://www.gstatic.com/firebasejs/5.4.1/firebase-firestore.js'></script> -->
+    <!-- <script src='https://www.gstatic.com/firebasejs/5.4.1/firebase-messaging.js'></script> -->
+    <!-- <script src='https://www.gstatic.com/firebasejs/5.4.1/firebase-functions.js'></script> -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel='stylesheet' href='chat-style.css'>
+  </head>
+  <body>
+    <div class='chat-app'>
+      <div class='card'>
+          <div class='card-header'>
+              <h3 class='card-title'>Donde Chat</h3>
+              <h6 class='card-subtitle'id='userWelcome' value=''>username</h6>
+          </div>
+          <div id='chat-display' class='card-body'>
+            <span id='messageThread'></span>
+          </div>
+          <div class='card-body' id='new-message-box'>  
+            <div class='form-group'>
+              <form>
+                  <label for='newMesaage'><h4>New Message:</h4></label>
+                  <input type='text' class='form-control' id='newChat' value='' placeholder='enter message'>
+                  <button class='btn btn-success' id='send-message-btn'>Send</button>    
+              </form>
+            </div>
+          </div>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script> -->
+    <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script> -->
+    <script src='chat.js'></script>
+  </body>
+</html>
