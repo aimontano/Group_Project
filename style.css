@@ -1,0 +1,21 @@
+#map{
+    height: 890px;
+    width: 890px;
+}
+#map-user-inp {
+    text-align: center;
+    padding: 20px;
+}
+#user-mess {
+    color: green;
+    padding-top: 10px
+}
+/* #map {
+    height: 100%;
+  } */
+  /* Optional: Makes the sample page fill the window. */
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
