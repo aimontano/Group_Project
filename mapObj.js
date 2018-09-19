@@ -12,18 +12,18 @@ var loadMap = {
         lat: null,
         lng: null
     },
-    Tags : {
-        UserInput: "#user-name",
-        SubmitButton: "#submit-name",
-        UserMess: "#user-mess",
-        CUser: "#c-user"
-    },
-    Mess : {
-        1: "Fieled id empty",
-        2: "User Location has been updated",
-        3: "User not found (new user is added).",
-        4: "hello "
-    },
+    // Tags : {
+    //     UserInput: "#user-name",
+    //     SubmitButton: "#submit-name",
+    //     UserMess: "#user-mess",
+    //     CUser: "#c-user"
+    // },
+    // Mess : {
+    //     1: "Fieled id empty",
+    //     2: "User Location has been updated",
+    //     3: "User not found (new user is added).",
+    //     4: "hello "
+    // },
     Markers : [],
     Map: null,
     Database: null,
@@ -31,24 +31,23 @@ var loadMap = {
     UserName: 'default',
     UserData: {},
     CUserData: {},
-    
-    GetUserName: function () {
-        $(loadMap.Tags.SubmitButton).on('click', function () {
-            loadMap.UserName = $(loadMap.Tags.UserInput).val();
-            if (loadMap.Tags.UserName == "") {
-                loadMap.SetMess(1, 2);
-            } else if (loadMap.CheckUser()) {
-                loadMap.SetMess(2, 1);
-                loadMap.UserEvent();
-            } else {
-                loadMap.SetMess(3, 1);
-                loadMap.UserEvent();
-            }
-        });
-    },
-    SetMess: function (MessID, Type) {
-        $(loadMap.Tags.UserMess).css({'color' : Type == 1 ? 'green' : 'red' }).text(loadMap.Mess[MessID]);
-    },
+    // GetUserName: function () {
+    //     $(loadMap.Tags.SubmitButton).on('click', function () {
+    //         loadMap.UserName = $(loadMap.Tags.UserInput).val();
+    //         if (loadMap.Tags.UserName == "") {
+    //             loadMap.SetMess(1, 2);
+    //         } else if (loadMap.CheckUser()) {
+    //             loadMap.SetMess(2, 1);
+    //             loadMap.UserEvent();
+    //         } else {
+    //             loadMap.SetMess(3, 1);
+    //             loadMap.UserEvent();
+    //         }
+    //     });
+    // },
+    // SetMess: function (MessID, Type) {
+    //     $(loadMap.Tags.UserMess).css({'color' : Type == 1 ? 'green' : 'red' }).text(loadMap.Mess[MessID]);
+    // },
     GetMarkers : function () {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
@@ -57,18 +56,18 @@ var loadMap = {
                     lat: position.coords.latitude
                 };
                 loadMap.Load();
-                loadMap.GetUserName();
+                // loadMap.GetUserName();
             });
         }
     },
-    CheckUser : function () {
+    // CheckUser : function () {
 
-        if (loadMap.UserData[loadMap.UserName]) {
-            loadMap.CUserData = loadMap.UserData[loadMap.UserName];
-            return true;
-        }
-         return null;
-    },
+    //     if (loadMap.UserData[loadMap.UserName]) {
+    //         loadMap.CUserData = loadMap.UserData[loadMap.UserName];
+    //         return true;
+    //     }
+    //      return null;
+    // },
     Load : function () {
         loadMap.Database = firebase.initializeApp(loadMap.Config);
         loadMap.Database = loadMap.Database.database();
@@ -94,11 +93,11 @@ var loadMap = {
             lat: loadMap.Pos.lat,
             lng: loadMap.Pos.lng
         });
-        loadMap.SayHi();
+        // loadMap.SayHi();
     },
-    SayHi : function () {
-        $(loadMap.Tags.CUser).text(loadMap.Mess[4]+loadMap.UserName);
-    },
+    // SayHi : function () {
+    //     $(loadMap.Tags.CUser).text(loadMap.Mess[4]+loadMap.UserName);
+    // },
     GetMarker : function () {
         loadMap.Map = new google.maps.Map(document.getElementById("map"), {
             center: {lat: loadMap.Pos.lat, lng: loadMap.Pos.lng},
@@ -121,12 +120,15 @@ var loadMap = {
             var m = loadMap.Markers[i];
             m.setMap(loadMap.Map);
         }
-        loadMap.Bounds.extend({lat: let, lng: lng});
-
+        
         google.maps.event.addListener(m,'click',function(){
             loadMap.Map.setZoom(14);
             loadMap.Map.setCenter(m.getPosition());
         });
+        
+        loadMap.Bounds.extend({lat: let, lng: lng});
+
+
     }
 };
 
