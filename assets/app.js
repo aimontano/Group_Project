@@ -154,7 +154,7 @@ auth.onAuthStateChanged(user => {
 				userExist(currentUserEmail);
 			} else { // if signed in with something other then an email redirect to user page,s
 				$('#main-content').load('./templates/profile.html', () =>{
-					$('#userInfo').text(result.user.displayName);
+					$('#userInfo').text(user.displayName);
 				});		
 			}
 		}
