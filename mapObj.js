@@ -31,6 +31,7 @@ var loadMap = {
     UserName: 'default',
     UserData: {},
     CUserData: {},
+    
     GetUserName: function () {
         $(loadMap.Tags.SubmitButton).on('click', function () {
             loadMap.UserName = $(loadMap.Tags.UserInput).val();
@@ -66,7 +67,6 @@ var loadMap = {
             loadMap.CUserData = loadMap.UserData[loadMap.UserName];
             return true;
         }
-
          return null;
     },
     Load : function () {
@@ -88,7 +88,7 @@ var loadMap = {
         });
     },
     UserEvent: function () {
-        loadMap.Database.ref("/"+loadMap.Config.dataBase+"/"+loadMap.UserName).set({
+        loadMap.Database.ref("/" + loadMap.Config.dataBase + "/"+loadMap.UserName).set({
             name: loadMap.UserName,
             icon: "userIcon",
             lat: loadMap.Pos.lat,
@@ -100,7 +100,6 @@ var loadMap = {
         $(loadMap.Tags.CUser).text(loadMap.Mess[4]+loadMap.UserName);
     },
     GetMarker : function () {
-
         loadMap.Map = new google.maps.Map(document.getElementById("map"), {
             center: {lat: loadMap.Pos.lat, lng: loadMap.Pos.lng},
             zoom:9
@@ -121,13 +120,13 @@ var loadMap = {
         {
             var m = loadMap.Markers[i];
             m.setMap(loadMap.Map);
-
-            // google.maps.event.addListener(m,'click',function(){
-            //     loadMap.Map.setZoom(8);
-            //     loadMap.Map.setCenter(m.getPosition());
-            // });
         }
         loadMap.Bounds.extend({lat: let, lng: lng});
+
+        google.maps.event.addListener(m,'click',function(){
+            loadMap.Map.setZoom(14);
+            loadMap.Map.setCenter(m.getPosition());
+        });
     }
 };
 
