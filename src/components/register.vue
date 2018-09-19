@@ -3,6 +3,7 @@
     <div class="row justify-content-md-center">
         <div class="col-md-6">
             <h2 class="text-center">{{ title }}</h2>
+            <p class="lead text-danger" id="message">{{ userMessage }}</p>
             <form>
                 <div class="form-row">
                     <div class="form-group col-md-6">
@@ -46,7 +47,7 @@
                     </div>
                 </div>
                 <hr>
-                <button v-on:click.prevent="registerUser()" class="btn btn-outline-primary btn-lg btn-block" id="btnRegister">Register</button>
+                <button v-on:click.prevent="registerUser()" class="btn btn-outline-primary btn-lg btn-block" id="btnRegister">Register &#38; Login</button>
             </form>					
         </div>
     </div>
@@ -63,25 +64,32 @@ export default {
             name: '',
             lastName: '',
             address: '',
-            interests: ''
+            interests: '',
+            userMessage: ''
         }
     },
     props: ['email'],
     methods: {
         registerUser: function(name, lastName, email) {
-            const db = firebase.database();
-            const userId = firebase.auth().currentUser.uid;
-            const userRef = db.ref('/users/' + userId);
+            if (this.name != '' && this.lastName != '') {
+                const db = firebase.database();
+                const userId = firebase.auth().currentUser.uid;
+                const userRef = db.ref('/users/' + userId);
 
-            userRef.once('value').then((snapshot) => {
-                console.log(snapshot.val());
-            });
+                userRef.once('value').then((snapshot) => {
+                    console.log(snapshot.val());
+                });
 
-            userRef.set({
-                userName: this.name,
-                lastName: this.lastName,
-                email: this.email
-            });
+                userRef.set({
+                    userName: this.name,
+                    lastName: this.lastName,
+                    email: this.email
+                });
+                this.$router.push({ path: '/home' });
+            }
+            else {
+                this.userMessage = 'You Must Enter Your First And Last Name';
+            } 
         }
     }
 }

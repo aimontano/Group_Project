@@ -99,7 +99,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
 
 body{
     font-family: 'Trebuchet MS', Arial, sans-serif;
@@ -110,7 +110,7 @@ body{
     border-radius: 5px;
     position: fixed;
     bottom: 3px;
-    right: 0;
+    left: 0;
 }
 
 .card-header {
