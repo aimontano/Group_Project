@@ -111,17 +111,53 @@ $(document).on('click', '#btnRegister', e => {
 });
 
 $(document).on('click', '#logout', e => {
-	e.preventDefault();
+	// e.preventDefault();
 
 	auth.signOut();
 	window.location.href = './index.html';
 })
 
+// google sign in hanlder
+$('#btnGoogle').click(e => {
+	e.preventDefault();
+	var provider = new firebase.auth.GoogleAuthProvider();
+	// redirects user to google log in page
+	auth.signInWithPopup(provider).then(function(result){ 
+		// if the user logs in successfully they're redirected to profile page
+		$('#main-content').load('./templates/profile.html', () =>{
+			$('#userInfo').text(result.user.displayName); 
+		}); 
+	});
+});
+
+// anonymous sign in hanlder
+$('#btnAnonymous').click(e => {
+	e.preventDefault();
+	auth.signInAnonymously().catch( e => {
+		console.log(e.message);
+	})
+
+});
+
 // Checks user state
 auth.onAuthStateChanged(user => {
-	if(user) {
-		currentUserEmail = user.email;
-		userExist(currentUserEmail);
+	if(user) { // user logged in
+ 		// if signed  in anonymously
+		if(user.isAnonymous) { // load user page
+			$('#main-content').load('./templates/profile.html', () => {
+				$('#userInfo').text("Random Person"); // display randomperson message
+			});
+		} else {
+			currentUserEmail = user.email; // set current email
+			if(user.displayName == null) { // if user logs in with email & password
+				$('#main-content').load('./templates/register.html'); // redirect to register page
+				userExist(currentUserEmail);
+			} else { // if signed in with something other then an email redirect to user page,s
+				$('#main-content').load('./templates/profile.html', () =>{
+					$('#userInfo').text(result.user.displayName);
+				});		
+			}
+		}
 		console.log("Logged In");
 	} else {
 		console.log("Not Logged in");
