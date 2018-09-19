@@ -24,16 +24,6 @@ const resetInputs = () => {
 
 // check if user exist through email
 const userExist = userEmail => {
-	// db.ref('/users/').on('child_added', snap => {
-	
-
-	// 	if(snap.val().email == userEmail){
-	// 		console.log("user exist");
-	// 	} else {
-	// 		$('#main-content').load('./templates/register.html');
-	// 		console.log("User not registered!");
-	// 	}
-	// })
 	usersRef.orderByChild('email').equalTo(userEmail).once('child_added', snap => {
 		if(snap.val()){
 			console.log("User exists");
@@ -41,18 +31,24 @@ const userExist = userEmail => {
 				$('#userInfo').text(snap.val().userName + " " + snap.val().lastName);
 			});
 		} else {
-			console.log("User doesn't exist");
+			$('#main-content').load('./templates/register.html');
 		}
 	})
 
 }
 
 // functions registers a users
-const registerUser = (name, lastName, email) => {
+const registerUser = (fName, lName, email, uid, coordinates) => {
 	usersRef.push({
-		userName: name,
-		lastName: lastName,
-		email: email
+		firstName: fName,
+		lastName: lName, 
+		email: email,
+		isOnline: true,
+		coordinates: {
+			lat: 0,
+			long: 0
+		},
+		uid: uid
 	});
 }
 
@@ -65,6 +61,14 @@ $('#btnLogin').click(e => {
 
 	if (email != '' && password != '' ) {
 		const promise = auth.signInWithEmailAndPassword(email, password);
+		// console.log(promise);
+
+		promise.then(snap => {
+			console.log(snap.user.email);
+			window.uid = snap.user.uid;
+			userExist(snap.user.email);
+		})
+
 		promise.catch(e => {
 			$('#message').text(e.message);
 		});
@@ -84,11 +88,13 @@ $('#btnSignUp').click(e => {
 
 	if (email != '' && password != '' ) {
 		const promise = auth.createUserWithEmailAndPassword(email, password);
+		
 		promise.catch(e => {
 			console.log(e.code)
 			$('#message').text(e.code);
 
 		});
+
 		$('#main-content').load('./templates/register.html');
 	} else {
 		alert("You must enter email & password!");
@@ -147,17 +153,14 @@ auth.onAuthStateChanged(user => {
 			$('#main-content').load('./templates/profile.html', () => {
 				$('#userInfo').text("Random Person"); // display randomperson message
 			});
-		} else {
-			currentUserEmail = user.email; // set current email
-			if(user.displayName == null) { // if user logs in with email & password
-				$('#main-content').load('./templates/register.html'); // redirect to register page
-				userExist(currentUserEmail);
-			} else { // if signed in with something other then an email redirect to user page,s
-				$('#main-content').load('./templates/profile.html', () =>{
-					$('#userInfo').text(user.displayName);
-				});		
-			}
-		}
+		} 
+		// else {
+		// 	{ // if signed in with something other then an email redirect to user page,s
+		// 		$('#main-content').load('./templates/profile.html', () =>{
+		// 			$('#userInfo').text(user.displayName);
+		// 		});		
+		// 	}
+		// }
 		console.log("Logged In");
 	} else {
 		console.log("Not Logged in");
