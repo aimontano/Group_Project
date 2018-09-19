@@ -1,0 +1,84 @@
+body {
+    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("../assets/Images/people-925936_1280.jpg");
+    background-size: cover;
+    height: 100vh;
+    background-position: bottom;
+    margin: auto;
+}
+
+h2 {
+    text-align:center;
+    padding-top: 10px;
+    color: white;
+}
+
+.card {
+    border: solid 3px #fff;
+    max-width: 420px;
+    margin: 0 auto;
+    background-color: rgba(224, 17, 95, 0.9);
+}
+.card-header {
+	color: #00415d;
+	text-align:center;
+}
+.card-header a{
+	color: white;
+	font-weight: bold;
+	font-size: 16px;
+}
+.card-header a.active{
+	color: #59B2E0;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+label {
+    color: white;
+}
+
+input[type="text"], 
+input[type="email"], 
+input[type="password"] {
+	height: 45px;
+	border: 1px solid #ddd;
+	font-size: 16px;
+}
+input:focus {
+	border-color: #ccc;
+}
+.btn-login {
+    background-color: #59B2E0;
+    margin: 0;
+	color: #fff;
+	font-size: 14px;
+}
+.btn-login:hover,
+.btn-login:focus {
+	color: #fff;
+	background-color: #53A3CD;
+	border-color: #53A3CD;
+}
+.forgot-password {
+	color: #59B2E0;
+}
+.forgot-password:hover,
+.forgot-password:focus {
+	text-decoration: underline;
+	color: white;
+}
+
+.btn-register {
+	background-color: #1CB94E;
+	color: #fff;
+	font-size: 14px;
+	height: auto;
+	font-weight: normal;
+	border-color: #1CB94A;
+}
+.btn-register:hover,
+.btn-register:focus {
+	color: #fff;
+	background-color: #1CA347;
+	border-color: #1CA347;
+}

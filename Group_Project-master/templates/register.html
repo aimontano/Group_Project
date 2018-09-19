@@ -1,0 +1,62 @@
+<div class="row justify-content-md-center">
+	<div id="register-form" class="col-md-6">
+		<div class="card">
+			<h2 class="text-center">Create A  Profile</h2>
+			<form>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="userName">Name</label>
+						<input type="text" id="userName" class="form-control" placeholder="(first name)">
+					</div>
+					<div class="form-group col-md-6">
+						<label for="lastName">Last Name</label>
+						<input type="text" id="lastName" class="form-control" placeholder="(last name)">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="address">Primary Location (optional)</label>
+					<input type="text" class="form-control" id="address" placeholder="(Wilmington, NC)">
+				</div>
+				<div class="form-group">
+					<label>Upload picture/select an avatar (optional)</label>
+				</div>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<button class="btn btn-outline-primary btn-block" id="btnUpload">Upload Picture</button>
+					</div>
+				</div>
+				<hr>
+				<button class="btn btn-outline-primary btn-lg btn-block" id="btnRegister">Register</button>
+			</form>
+		</div>					
+	</div>
+</div>
+
+<style>
+		body {    
+			font-family: 'Trebuchet MS', Arial, sans-serif;
+			background-image: url('assets/images/people-1031169_1920.jpg');
+			background-size: cover;
+			height: 100vh;
+			background-position: center;
+			margin: auto;
+		}
+		.navbar {background-image: linear-gradient(to bottom right, rgba(29, 41, 81), rgba(16, 52, 166));}
+		#site-title {color: #ff0800;}
+		#login-card {
+			min-width:300px;
+			margin: 0 auto;
+			border-radius: 4px;
+			background-color: rgba(196, 219, 246, 0.89);
+		}
+		#login-header {
+			background-image: linear-gradient(to bottom right, rgba(124, 10, 2), rgba(255, 8, 0));
+			color: white;
+			text-align: center;
+			border: none;
+		}
+		#form-content { padding: 15px;}
+		#form-content h6 {text-align: center; font-size: 14px;}
+		#login-footer button {width: 40%; background-color:rgba(16, 52, 166); border: 1px solid #3FEEE6;}
+		#login-footer button:hover {font-size: 17px; color: white;}
+		#register-form { color: white; }
