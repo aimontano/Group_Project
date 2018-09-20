@@ -32,7 +32,7 @@ const displayRegisterPage = () => {
 // funtion display profile page
 const displayProfile = (displayName) => {
 	$("#main-content").load("./templates/profile.html", () => {
-		usersRef.on('child_added', snap => {
+		usersRef.on('child_changed', snap => {
 			let user = snap.val();
 			if(user.isOnline) {
 				$('#onlineUsers').load('./templates/onlineUsers.html', () => {
@@ -45,7 +45,7 @@ const displayProfile = (displayName) => {
 					$('tbody').append($tr);
 				});
 			} else {
-				console.log(user.firstName);
+				// todo: add remove child when offline
 			}
 		});		
 
