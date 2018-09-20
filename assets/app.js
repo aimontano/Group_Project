@@ -25,13 +25,30 @@ const resetInputs = () => {
 }
 
 // function displays register page
-displayRegisterPage = () => {
+const displayRegisterPage = () => {
 	$('#main-content').load('./templates/register.html');
 }
 
 // funtion display profile page
 const displayProfile = (displayName) => {
-	$("#main-content").load("./templates/profile.html" ,function(){
+	$("#main-content").load("./templates/profile.html", () => {
+		usersRef.on('child_added', snap => {
+			let user = snap.val();
+			if(user.isOnline) {
+				$('#onlineUsers').load('./templates/onlineUsers.html', () => {
+					let $tr = $('<tr>');
+
+					$tr.append($('<td>').text(user.firstName));
+					$tr.append($('<td>').text(user.lastName));
+					$tr.append($('<td>').text(user.email));
+
+					$('tbody').append($tr);
+				});
+			} else {
+				console.log(user.firstName);
+			}
+		});		
+
 		$('#userInfo').text(displayName); 
 	});
 }
@@ -133,8 +150,7 @@ $('#btnAnonymous').click(e => {
 	e.preventDefault();
 	auth.signInAnonymously().catch( e => {
 		console.log(e.message);
-	})
-
+	});
 });
 
 // Checks user state
