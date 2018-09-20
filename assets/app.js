@@ -11,8 +11,9 @@ firebase.initializeApp(config);
 
 const auth = firebase.auth();
 const db = firebase.database();
-
 const usersRef = db.ref('/users');
+let connectedRef = db.ref('.info/connected');
+
 
 let userEmail; // stores current logged user
 let userID; 
@@ -136,9 +137,21 @@ $('#btnAnonymous').click(e => {
 
 // Checks user state
 auth.onAuthStateChanged(user => {
+
 	if(user) { // user logged in
 		// console.log(user)
  		// if signed  in anonymously
+		connectedRef.on('value', function(snap){
+		  if(snap.val()){
+		    let connection = usersRef.child(user.uid);
+		    connection.update({isOnline: true});
+
+		    connection.onDisconnect().update({
+		    	isOnline: false
+		    })
+		  } 
+		}); 
+
 		if(user.isAnonymous) { // load user page
 			$('#main-content').load('./templates/profile.html', () => {
 				$('#userInfo').text("Random Person"); // display randomperson message
