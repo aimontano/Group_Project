@@ -24,7 +24,7 @@ var loadMap = {
     //     3: "User not found (new user is added).",
     //     4: "hello "
     // },
-    Markers : [],
+    // Markers : [],
     Map: null,
     Database: null,
     Bounds: {},
@@ -48,14 +48,15 @@ var loadMap = {
     // SetMess: function (MessID, Type) {
     //     $(loadMap.Tags.UserMess).css({'color' : Type == 1 ? 'green' : 'red' }).text(loadMap.Mess[MessID]);
     // },
-    GetMarkers : function () {
+    GetMyPos : function () {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 loadMap.Pos = {
                     lng: position.coords.longitude,
                     lat: position.coords.latitude
                 };
-                loadMap.Load();
+                loadMap.LoadFromDatabase();
+                loadMap.DrawMap();
                 // loadMap.GetUserName();
             });
         }
@@ -68,23 +69,23 @@ var loadMap = {
     //     }
     //      return null;
     // },
-    Load : function () {
+
+    LoadFromDatabase : function () {
         loadMap.Database = firebase.initializeApp(loadMap.Config);
         loadMap.Database = loadMap.Database.database();
 
-        loadMap.GetMarker();
-
         loadMap.Database.ref(loadMap.Config.dataBase).on("value", function(snapshoot){
+            
             loadMap.UserData = snapshoot.val();
-            loadMap.GetMarker();
+            
             for (var key in loadMap.UserData ) {
                 if (loadMap.UserData.hasOwnProperty(key)) {
-                    loadMap.AddAllMarkers(loadMap.UserData[key].lat, loadMap.UserData[key].lng);
+                    loadMap.AddMarkerOn(loadMap.UserData[key].lat, loadMap.UserData[key].lng);
                 }
             }
-
             loadMap.Map.fitBounds(loadMap.Bounds);
         });
+
     },
     UserEvent: function () {
         loadMap.Database.ref("/" + loadMap.Config.dataBase + "/"+loadMap.UserName).set({
@@ -98,38 +99,31 @@ var loadMap = {
     // SayHi : function () {
     //     $(loadMap.Tags.CUser).text(loadMap.Mess[4]+loadMap.UserName);
     // },
-    GetMarker : function () {
+    DrawMap : function () {
+
         loadMap.Map = new google.maps.Map(document.getElementById("map"), {
             center: {lat: loadMap.Pos.lat, lng: loadMap.Pos.lng},
             zoom:9
         });
         loadMap.Bounds = new google.maps.LatLngBounds({lat: loadMap.Pos.lat, lng: loadMap.Pos.lng});
 
-        loadMap.AddAllMarkers(loadMap.Pos.lat, loadMap.Pos.lng);
+        loadMap.AddMarkerOn(loadMap.Pos.lat, loadMap.Pos.lng);
     },
-    AddAllMarkers : function (let, lng) {
+    AddMarkerOn : function (lat, lng) {
 
-        if (let == undefined || lng == undefined) return;
+        if (lat == undefined || lng == undefined) return;
 
-        loadMap.Markers.push(new google.maps.Marker({
-            position: new google.maps.LatLng(let, lng)
-        }));
-
-        for(i=0;i< loadMap.Markers.length;i++)
-        {
-            var m = loadMap.Markers[i];
-            m.setMap(loadMap.Map);
-        }
+        var newMarker = new google.maps.Marker({position:{lat, lng}});
+        newMarker.setMap(loadMap.Map);
         
-        google.maps.event.addListener(m,'click',function(){
+        google.maps.event.addListener(newMarker,'click',function(){
             loadMap.Map.setZoom(14);
-            loadMap.Map.setCenter(m.getPosition());
+            loadMap.Map.setCenter(newMarker.getPosition());
+            loadMap.Map.panTo(this.getPosition());
         });
-        
-        loadMap.Bounds.extend({lat: let, lng: lng});
 
-
+        loadMap.Bounds.extend({lat: lat, lng: lng});
     }
 };
 
-loadMap.GetMarkers();
+loadMap.GetMyPos();
