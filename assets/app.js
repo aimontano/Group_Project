@@ -9,12 +9,14 @@ var config = {
 };
 firebase.initializeApp(config);
 
-const auth = firebase.auth();
-const db = firebase.database();
+const auth = firebase.auth(); // auth reference
+const db = firebase.database(); // database reference
+const usersRef = db.ref('/users'); // users reference
+let connectedRef = db.ref('.info/connected'); // user connection reference
 
-const usersRef = db.ref('/users');
 
-let currentUserEmail; // stores current logged user
+let userEmail; // stores current logged user
+let userID;  // stores current user id
 
 // reset inputs
 const resetInputs = () => {
@@ -22,38 +24,49 @@ const resetInputs = () => {
 	$('#userPassword').val('');
 }
 
-// check if user exist through email
-const userExist = userEmail => {
-	// db.ref('/users/').on('child_added', snap => {
-	
+// function displays register page
+const displayRegisterPage = () => {
+	$('#main-content').load('./templates/register.html');
+}
 
-	// 	if(snap.val().email == userEmail){
-	// 		console.log("user exist");
-	// 	} else {
-	// 		$('#main-content').load('./templates/register.html');
-	// 		console.log("User not registered!");
-	// 	}
-	// })
-	usersRef.orderByChild('email').equalTo(userEmail).once('child_added', snap => {
-		if(snap.val()){
-			console.log("User exists");
-			$('#main-content').load('./templates/profile.html', () =>{
-				$('#userInfo').text(snap.val().userName + " " + snap.val().lastName);
-			});
-		} else {
-			console.log("User doesn't exist");
-		}
-	})
+// funtion display profile page
+const displayProfile = (displayName) => {
+	$("#main-content").load("./templates/profile.html", () => {
+		usersRef.on('child_added', snap => {
+			let user = snap.val();
+			if(user.isOnline) {
+				$('#onlineUsers').load('./templates/onlineUsers.html', () => {
+					let $tr = $('<tr>');
 
+					$tr.append($('<td>').text(user.firstName));
+					$tr.append($('<td>').text(user.lastName));
+					$tr.append($('<td>').text(user.email));
+
+					$('tbody').append($tr);
+				});
+			} else {
+				console.log(user.firstName);
+			}
+		});		
+
+		$('#userInfo').text(displayName); 
+	});
 }
 
 // functions registers a users
-const registerUser = (name, lastName, email) => {
-	usersRef.push({
-		userName: name,
-		lastName: lastName,
-		email: email
-	});
+const registerUser = (fName, lName, email, uid) => {
+  let user = usersRef.child('/' + uid); // sets user unique id
+  user.set({
+		firstName: fName,
+		lastName: lName, 
+		email: email,
+		isOnline: true,
+		coordinates: {
+			lat: 0,
+			long: 0
+		},
+		uid: uid  	// todo: debate whether is a good idea to have two reference of uid or not
+  });
 }
 
 // login click handler
@@ -62,17 +75,17 @@ $('#btnLogin').click(e => {
 
 	let email = $('#userEmail').val().trim();
 	let password = $('#userPassword').val().trim();
-
+	// if user has entered password and email
 	if (email != '' && password != '' ) {
-		const promise = auth.signInWithEmailAndPassword(email, password);
-		promise.catch(e => {
+		const promise = auth.signInWithEmailAndPassword(email, password); // sign them in
+		promise.catch(e => { // else show them an error message
 			$('#message').text(e.message);
 		});
 	} else {
 		alert("You must enter email & password!");
 	}
 
-	// resetInputs();
+	resetInputs();
 });
 
 // sign up click handler
@@ -83,38 +96,40 @@ $('#btnSignUp').click(e => {
 	let password = $('#userPassword').val().trim();
 
 	if (email != '' && password != '' ) {
-		const promise = auth.createUserWithEmailAndPassword(email, password);
+		const promise = auth.createUserWithEmailAndPassword(email, password); // create user on firebase
 		promise.catch(e => {
-			console.log(e.code)
-			$('#message').text(e.code);
-
+			$('#message').text(e.code); // if user exists notify user
 		});
-		$('#main-content').load('./templates/register.html');
+		// displayRegisterPage();
 	} else {
 		alert("You must enter email & password!");
 	}
-	// resetInputs();
+	resetInputs();
 });
 
 // register click handler
 $(document).on('click', '#btnRegister', e => {
 	e.preventDefault();
 
-	let userName = $('#userName').val().trim();
+	let firstName = $('#userName').val().trim();
 	let lastName = $('#lastName').val().trim();
 
-	if(userName != '' && lastName != '') {
-		registerUser(userName, lastName, currentUserEmail);
+	if(firstName != '' && lastName != '') {
+		registerUser(firstName, lastName, userEmail, userID); // register users' information
+		let displayName = firstName + " " + lastName;
+		auth.currentUser.updateProfile({ // update current user display name
+			displayName: displayName
+		});
+		displayProfile(displayName); // render profile page
 	} else {
 		alert("You must enter your first and last name");
 	}
 });
 
+// logout handler
 $(document).on('click', '#logout', e => {
-	// e.preventDefault();
-
-	auth.signOut();
-	window.location.href = './index.html';
+	auth.signOut(); // sign user out
+	window.location.href = './index.html'; // render login page
 })
 
 // google sign in hanlder
@@ -122,11 +137,11 @@ $('#btnGoogle').click(e => {
 	e.preventDefault();
 	var provider = new firebase.auth.GoogleAuthProvider();
 	// redirects user to google log in page
-	auth.signInWithPopup(provider).then(function(result){ 
-		// if the user logs in successfully they're redirected to profile page
-		$('#main-content').load('./templates/profile.html', () =>{
-			$('#userInfo').text(result.user.displayName); 
-		}); 
+	auth.signInWithPopup(provider).then(snap => {
+		let firstName = snap.additionalUserInfo.profile.given_name;
+		let lastName = snap.additionalUserInfo.profile.family_name;
+		let uid = snap.user.uid;
+		registerUser(firstName, lastName, snap.user.email, uid);
 	});
 });
 
@@ -135,29 +150,41 @@ $('#btnAnonymous').click(e => {
 	e.preventDefault();
 	auth.signInAnonymously().catch( e => {
 		console.log(e.message);
-	})
-
+	});
 });
 
 // Checks user state
 auth.onAuthStateChanged(user => {
+
 	if(user) { // user logged in
+		// console.log(user)
  		// if signed  in anonymously
+		connectedRef.on('value', function(snap){
+		  if(snap.val()){
+		    let connection = usersRef.child(user.uid); // reference to unique user that's present
+		    connection.update({isOnline: true}); // update database to show user is present
+
+		    connection.onDisconnect().update({ // when disconnected update database 
+		    	isOnline: false
+		    })
+		  } 
+		}); 
+
+		// if logged in anonymously
 		if(user.isAnonymous) { // load user page
-			$('#main-content').load('./templates/profile.html', () => {
-				$('#userInfo').text("Random Person"); // display randomperson message
-			});
-		} else {
-			currentUserEmail = user.email; // set current email
-			if(user.displayName == null) { // if user logs in with email & password
-				$('#main-content').load('./templates/register.html'); // redirect to register page
-				userExist(currentUserEmail);
-			} else { // if signed in with something other then an email redirect to user page,s
-				$('#main-content').load('./templates/profile.html', () =>{
-					$('#userInfo').text(user.displayName);
-				});		
-			}
-		}
+			displayProfile();
+		} 
+		
+		// if user has display name
+		if(user.displayName != null)
+			displayProfile(user.displayName);  // display profile page
+
+		if(user.displayName == null ) { // is logged user doesn't have a display name
+			userEmail = user.email;
+			userID = user.uid;
+			displayRegisterPage();// ask for first and last name - display register page
+		} 
+		
 		console.log("Logged In");
 	} else {
 		console.log("Not Logged in");
