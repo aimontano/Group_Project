@@ -24,21 +24,7 @@ const resetInputs = () => {
 	$('#userPassword').val('');
 }
 
-// check if user exist through email
-const userExist = userEmail => {
-	usersRef.orderByChild('email').equalTo(userEmail).once('child_added', snap => {
-		if(snap.val()){
-			console.log("User exists");
-			$('#main-content').load('./templates/profile.html', () =>{
-				$('#userInfo').text(snap.val().userName + " " + snap.val().lastName);
-			});
-		} else {
-			$('#main-content').load('./templates/register.html');
-		}
-	})
-}
-
-const displayRegisterPage = () => {
+displayRegisterPage = () => {
 	$('#main-content').load('./templates/register.html');
 }
 
@@ -50,7 +36,6 @@ const displayProfile = (displayName) => {
 
 // functions registers a users
 const registerUser = (fName, lName, email, uid) => {
-
   let user = usersRef.child('/' +uid);
   user.set({
 		firstName: fName,
@@ -63,9 +48,7 @@ const registerUser = (fName, lName, email, uid) => {
 		},
 		uid: uid  	
   });
-
 }
-
 
 // login click handler
 $('#btnLogin').click(e => {
@@ -83,7 +66,7 @@ $('#btnLogin').click(e => {
 		alert("You must enter email & password!");
 	}
 
-	// resetInputs();
+	resetInputs();
 });
 
 // sign up click handler
@@ -98,11 +81,11 @@ $('#btnSignUp').click(e => {
 		promise.catch(e => {
 			$('#message').text(e.code);
 		});
-		displayRegisterPage();
+		// displayRegisterPage();
 	} else {
 		alert("You must enter email & password!");
 	}
-	// resetInputs();
+	resetInputs();
 });
 
 // register click handler
@@ -118,14 +101,13 @@ $(document).on('click', '#btnRegister', e => {
 		auth.currentUser.updateProfile({
 			displayName: displayName
 		});
+		displayProfile(displayName);
 	} else {
 		alert("You must enter your first and last name");
 	}
 });
 
 $(document).on('click', '#logout', e => {
-	// e.preventDefault();
-
 	auth.signOut();
 	window.location.href = './index.html';
 })
@@ -142,12 +124,6 @@ $('#btnGoogle').click(e => {
 		registerUser(firstName, lastName, snap.user.email, uid);
 	});
 });
-
-const isUser = (uid) => {
-	db.ref('/users').on('child_added', snap  => {
-		console.log(snap.val());
-	});
-}
 
 // anonymous sign in hanlder
 $('#btnAnonymous').click(e => {
@@ -169,17 +145,16 @@ auth.onAuthStateChanged(user => {
 			});
 		} 
 		
-		userExist(user.email);
+		// userExist(user.email);
+		if(user.displayName != null)
+			displayProfile(user.displayName);
 
 		if(user.displayName == null ) {
 			userEmail = user.email;
 			userID = user.uid;
 			displayRegisterPage();
-		} else {
-			displayProfile(user.displayName);
-		}
-
-
+		} 
+		
 		console.log("Logged In");
 	} else {
 		console.log("Not Logged in");
