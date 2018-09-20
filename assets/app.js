@@ -9,15 +9,14 @@ var config = {
 };
 firebase.initializeApp(config);
 
-const auth = firebase.auth();
-const db = firebase.database();
-const usersRef = db.ref('/users');
-let connectedRef = db.ref('.info/connected');
+const auth = firebase.auth(); // auth reference
+const db = firebase.database(); // database reference
+const usersRef = db.ref('/users'); // users reference
+let connectedRef = db.ref('.info/connected'); // user connection reference
 
 
 let userEmail; // stores current logged user
-let userID; 
-var user = firebase.auth().currentUser;
+let userID;  // stores current user id
 
 // reset inputs
 const resetInputs = () => {
@@ -25,10 +24,12 @@ const resetInputs = () => {
 	$('#userPassword').val('');
 }
 
+// function displays register page
 displayRegisterPage = () => {
 	$('#main-content').load('./templates/register.html');
 }
 
+// funtion display profile page
 const displayProfile = (displayName) => {
 	$("#main-content").load("./templates/profile.html" ,function(){
 		$('#userInfo').text(displayName); 
@@ -37,7 +38,7 @@ const displayProfile = (displayName) => {
 
 // functions registers a users
 const registerUser = (fName, lName, email, uid) => {
-  let user = usersRef.child('/' +uid);
+  let user = usersRef.child('/' + uid); // sets user unique id
   user.set({
 		firstName: fName,
 		lastName: lName, 
@@ -47,7 +48,7 @@ const registerUser = (fName, lName, email, uid) => {
 			lat: 0,
 			long: 0
 		},
-		uid: uid  	
+		uid: uid  	// todo: debate whether is a good idea to have two reference of uid or not
   });
 }
 
@@ -57,10 +58,10 @@ $('#btnLogin').click(e => {
 
 	let email = $('#userEmail').val().trim();
 	let password = $('#userPassword').val().trim();
-
+	// if user has entered password and email
 	if (email != '' && password != '' ) {
-		const promise = auth.signInWithEmailAndPassword(email, password);
-		promise.catch(e => {
+		const promise = auth.signInWithEmailAndPassword(email, password); // sign them in
+		promise.catch(e => { // else show them an error message
 			$('#message').text(e.message);
 		});
 	} else {
@@ -78,9 +79,9 @@ $('#btnSignUp').click(e => {
 	let password = $('#userPassword').val().trim();
 
 	if (email != '' && password != '' ) {
-		const promise = auth.createUserWithEmailAndPassword(email, password);
+		const promise = auth.createUserWithEmailAndPassword(email, password); // create user on firebase
 		promise.catch(e => {
-			$('#message').text(e.code);
+			$('#message').text(e.code); // if user exists notify user
 		});
 		// displayRegisterPage();
 	} else {
@@ -97,20 +98,21 @@ $(document).on('click', '#btnRegister', e => {
 	let lastName = $('#lastName').val().trim();
 
 	if(firstName != '' && lastName != '') {
-		registerUser(firstName, lastName, userEmail, userID);
+		registerUser(firstName, lastName, userEmail, userID); // register users' information
 		let displayName = firstName + " " + lastName;
-		auth.currentUser.updateProfile({
+		auth.currentUser.updateProfile({ // update current user display name
 			displayName: displayName
 		});
-		displayProfile(displayName);
+		displayProfile(displayName); // render profile page
 	} else {
 		alert("You must enter your first and last name");
 	}
 });
 
+// logout handler
 $(document).on('click', '#logout', e => {
-	auth.signOut();
-	window.location.href = './index.html';
+	auth.signOut(); // sign user out
+	window.location.href = './index.html'; // render login page
 })
 
 // google sign in hanlder
@@ -143,29 +145,28 @@ auth.onAuthStateChanged(user => {
  		// if signed  in anonymously
 		connectedRef.on('value', function(snap){
 		  if(snap.val()){
-		    let connection = usersRef.child(user.uid);
-		    connection.update({isOnline: true});
+		    let connection = usersRef.child(user.uid); // reference to unique user that's present
+		    connection.update({isOnline: true}); // update database to show user is present
 
-		    connection.onDisconnect().update({
+		    connection.onDisconnect().update({ // when disconnected update database 
 		    	isOnline: false
 		    })
 		  } 
 		}); 
 
+		// if logged in anonymously
 		if(user.isAnonymous) { // load user page
-			$('#main-content').load('./templates/profile.html', () => {
-				$('#userInfo').text("Random Person"); // display randomperson message
-			});
+			displayProfile();
 		} 
 		
-		// userExist(user.email);
+		// if user has display name
 		if(user.displayName != null)
-			displayProfile(user.displayName);
+			displayProfile(user.displayName);  // display profile page
 
-		if(user.displayName == null ) {
+		if(user.displayName == null ) { // is logged user doesn't have a display name
 			userEmail = user.email;
 			userID = user.uid;
-			displayRegisterPage();
+			displayRegisterPage();// ask for first and last name - display register page
 		} 
 		
 		console.log("Logged In");
