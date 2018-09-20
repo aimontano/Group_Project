@@ -14,7 +14,9 @@ const db = firebase.database();
 
 const usersRef = db.ref('/users');
 
-let currentUserEmail; // stores current logged user
+let userEmail; // stores current logged user
+let userID; 
+var user = firebase.auth().currentUser;
 
 // reset inputs
 const resetInputs = () => {
@@ -34,12 +36,23 @@ const userExist = userEmail => {
 			$('#main-content').load('./templates/register.html');
 		}
 	})
+}
 
+const displayRegisterPage = () => {
+	$('#main-content').load('./templates/register.html');
+}
+
+const displayProfile = (displayName) => {
+	$("#main-content").load("./templates/profile.html" ,function(){
+		$('#userInfo').text(displayName); 
+	});
 }
 
 // functions registers a users
-const registerUser = (fName, lName, email, uid, coordinates) => {
-	usersRef.push({
+const registerUser = (fName, lName, email, uid) => {
+
+  let user = usersRef.child('/' +uid);
+  user.set({
 		firstName: fName,
 		lastName: lName, 
 		email: email,
@@ -48,9 +61,11 @@ const registerUser = (fName, lName, email, uid, coordinates) => {
 			lat: 0,
 			long: 0
 		},
-		uid: uid
-	});
+		uid: uid  	
+  });
+
 }
+
 
 // login click handler
 $('#btnLogin').click(e => {
@@ -61,14 +76,6 @@ $('#btnLogin').click(e => {
 
 	if (email != '' && password != '' ) {
 		const promise = auth.signInWithEmailAndPassword(email, password);
-		// console.log(promise);
-
-		promise.then(snap => {
-			console.log(snap.user.email);
-			window.uid = snap.user.uid;
-			userExist(snap.user.email);
-		})
-
 		promise.catch(e => {
 			$('#message').text(e.message);
 		});
@@ -88,14 +95,10 @@ $('#btnSignUp').click(e => {
 
 	if (email != '' && password != '' ) {
 		const promise = auth.createUserWithEmailAndPassword(email, password);
-		
 		promise.catch(e => {
-			console.log(e.code)
 			$('#message').text(e.code);
-
 		});
-
-		$('#main-content').load('./templates/register.html');
+		displayRegisterPage();
 	} else {
 		alert("You must enter email & password!");
 	}
@@ -106,11 +109,15 @@ $('#btnSignUp').click(e => {
 $(document).on('click', '#btnRegister', e => {
 	e.preventDefault();
 
-	let userName = $('#userName').val().trim();
+	let firstName = $('#userName').val().trim();
 	let lastName = $('#lastName').val().trim();
 
-	if(userName != '' && lastName != '') {
-		registerUser(userName, lastName, currentUserEmail);
+	if(firstName != '' && lastName != '') {
+		registerUser(firstName, lastName, userEmail, userID);
+		let displayName = firstName + " " + lastName;
+		auth.currentUser.updateProfile({
+			displayName: displayName
+		});
 	} else {
 		alert("You must enter your first and last name");
 	}
@@ -128,13 +135,19 @@ $('#btnGoogle').click(e => {
 	e.preventDefault();
 	var provider = new firebase.auth.GoogleAuthProvider();
 	// redirects user to google log in page
-	auth.signInWithPopup(provider).then(function(result){ 
-		// if the user logs in successfully they're redirected to profile page
-		$('#main-content').load('./templates/profile.html', () =>{
-			$('#userInfo').text(result.user.displayName); 
-		}); 
+	auth.signInWithPopup(provider).then(snap => {
+		let firstName = snap.additionalUserInfo.profile.given_name;
+		let lastName = snap.additionalUserInfo.profile.family_name;
+		let uid = snap.user.uid;
+		registerUser(firstName, lastName, snap.user.email, uid);
 	});
 });
+
+const isUser = (uid) => {
+	db.ref('/users').on('child_added', snap  => {
+		console.log(snap.val());
+	});
+}
 
 // anonymous sign in hanlder
 $('#btnAnonymous').click(e => {
@@ -148,19 +161,25 @@ $('#btnAnonymous').click(e => {
 // Checks user state
 auth.onAuthStateChanged(user => {
 	if(user) { // user logged in
+		// console.log(user)
  		// if signed  in anonymously
 		if(user.isAnonymous) { // load user page
 			$('#main-content').load('./templates/profile.html', () => {
 				$('#userInfo').text("Random Person"); // display randomperson message
 			});
 		} 
-		// else {
-		// 	{ // if signed in with something other then an email redirect to user page,s
-		// 		$('#main-content').load('./templates/profile.html', () =>{
-		// 			$('#userInfo').text(user.displayName);
-		// 		});		
-		// 	}
-		// }
+		
+		userExist(user.email);
+
+		if(user.displayName == null ) {
+			userEmail = user.email;
+			userID = user.uid;
+			displayRegisterPage();
+		} else {
+			displayProfile(user.displayName);
+		}
+
+
 		console.log("Logged In");
 	} else {
 		console.log("Not Logged in");
