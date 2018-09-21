@@ -4,7 +4,7 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Donde Chat</h3>
-                <h6 class="card-subtitle" id="userWelcome" value="">username</h6>
+                <h6 class="card-subtitle" id="userWelcome" value="">{{ displayName }}</h6>
             </div>
             <div id="chat-display" class="card-body">
             <span v-for="message in chatData" :key="message.id">
@@ -35,26 +35,38 @@ export default {
     data() {
         return {
             chatMessage: '',
-            chatData: []
+            chatData: [],
+            displayName: ''
         }
     },
     methods: {
         sendMessage: function(event) {
             const database = firebase.database();
-            var username = 'username';
+            var username = this.displayName;
             var now = moment().format('MM/DD/YY - hh:mm:ss A');
             var newChat = {
                 user: username,
                 message: this.chatMessage,
                 timestamp: now
             };
-            database.ref().push(newChat);
+            database.ref('/chat/').push(newChat);
             this.chatMessage = '';
         }
     },
     created: function() {
         const database = firebase.database();
-        database.ref().on('child_added', (childSnapshot) => {
+        const currentUser = firebase.auth().currentUser;
+        const userId = currentUser.uid;
+        const userRef = firebase.database().ref('/users/' + userId);
+
+        userRef.on('value', (snapshot) => {
+            console.log(snapshot.val().userName);
+            this.displayName = snapshot.val().userName;
+        })
+
+        this.userName = userRef.userName;
+
+        database.ref('/chat/').on('child_added', (childSnapshot) => {
             var sender = childSnapshot.val().user;
             var chat = childSnapshot.val().message;
             var time = childSnapshot.val().timestamp;

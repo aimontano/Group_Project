@@ -3,7 +3,7 @@
     <div class="container-fluid h-100 d-flex flex-column" id="app">
         <div class="row">
             <div class="col-12" id="navbar-column">
-                <NavBar v-bind:users="onlineUsers.length" v-on:toggle-user-list="toggleUserList($event)"></NavBar>
+                <NavBar v-bind:users="onlineUsers.length" v-on:toggle-chat="toggleChat($event)" v-on:toggle-user-list="toggleUserList($event)"></NavBar>
             </div>
         </div>
 
@@ -13,7 +13,7 @@
                 <Users v-if="showUserList" v-bind:online-users="onlineUsers" v-on:user-selected="onUserSelected($event)"></Users>
             </div>
         </div>
-        <Chat></Chat>
+        <Chat v-if="showChat"></Chat>
     </div>
 
 </template>
@@ -99,6 +99,7 @@ export default {
         return {
             title: 'Donde',
             showUserList: false,
+            showChat: false,
             userId: '',
             onlineUsers: [],
             mapMarkerArray: [],
@@ -124,7 +125,8 @@ export default {
                 }
             });
 
-            ref.orderByChild('state').equalTo('offline').on('child_added', (snapshot) => {
+
+            ref.orderByChild('state').equalTo('online').on('child_removed', (snapshot) => {
                 const id = snapshot.key;
                 for (let i = 0; i < this.onlineUsers.length; i++) {
                     if (this.onlineUsers[i].id == id) {
@@ -151,12 +153,19 @@ export default {
             this.mapMarkerArray.push(userObject);
         },
         toggleUserList: function(showUserList) {
-            console.log('showUserList', showUserList);
             if (showUserList === true) {
                 this.showUserList = true;
             } 
             else {
                 this.showUserList = false;
+            }
+        },
+        toggleChat: function(showChat) {
+            if (showChat === true) {
+                this.showChat = true;
+            }
+            else {
+                this.showChat = false;
             }
         },
         persistLocation: function(userId, username, position) {

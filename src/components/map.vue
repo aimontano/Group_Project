@@ -1,7 +1,6 @@
 <template>
 
     <div id="set-map" class="h-100">
-        {{ userMarker }}
       <GmapMap
         ref="myMap"
         :center="userPosition"
