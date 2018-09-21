@@ -3,17 +3,14 @@
     <div class="container-fluid h-100 d-flex flex-column" id="app">
         <div class="row">
             <div class="col-12" id="navbar-column">
-                <NavBar></NavBar>
+                <NavBar v-bind:users="onlineUsers.length" v-on:toggle-user-list="toggleUserList($event)"></NavBar>
             </div>
         </div>
 
         <div class="row flex-fill d-flex">
             <div class="col-12">
-       
-                
-                <div id="map">
-                <div id="mapgiorgi"></div>
-                </div>
+                <Map v-bind:map-marker-array="mapMarkerArray" v-bind:user-marker="userMarker"></Map>
+                <Users v-if="showUserList" v-bind:online-users="onlineUsers" v-on:user-selected="onUserSelected($event)"></Users>
             </div>
         </div>
         <Chat></Chat>
@@ -27,124 +24,15 @@
 import NavBar from './nav.vue'
 import Map from './map.vue'
 import Chat from './chat.vue'
+import Users from './users.vue'
 
 export default {
     name: 'Home',
     components: {
         NavBar,
         Map,
-        Chat
-    },
-    mounted() {
-    var database1 = firebase.database();
-        
-
-        var loadMap = {
-        // Config: {
-        //     apiKey:            "AIzaSyD4Knjz8L7b6Tbk9Ipe6lcaSMwFWPZzMfA",
-        //     authDomain:        "mapmarkers-dba7e.firebaseapp.com",
-        //     databaseURL:       "https://mapmarkers-dba7e.firebaseio.com",
-        //     projectId:         "mapmarkers-dba7e",
-        //     storageBucket:     "mapmarkers-dba7e.appspot.com",
-        //     messagingSenderId: "1047905061223",
-        //     dataBase:          "userMarkers"
-        // },
-        Pos: {
-            lat: null,
-            lng: null
-        },
-        Map: null,
-        Database: null,
-        Bounds: {},
-        UserName: 'default',
-        UserData: {},
-        CUserData: {},
-
-        GetMyPos : function () {
-
-            if (navigator.geolocation) {
-
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    loadMap.Pos = {
-                        lng: position.coords.longitude,
-                        lat: position.coords.latitude
-                    };
-                    loadMap.LoadFromDatabase();
-                    loadMap.DrawMap();
-                });
-            }
-        },
-
-        LoadFromDatabase : function () {
-            // loadMap.Database = firebase.initializeApp(loadMap.Config);
-            // loadMap.Database = loadMap.Database.database();
-
-            loadMap.Database.ref("userMarkers").on("value", function(snapshoot){
-                
-                loadMap.UserData = snapshoot.val();
-                
-                for (var key in loadMap.UserData ) {
-                    if (loadMap.UserData.hasOwnProperty(key)) {
-                        loadMap.AddMarkerOn(loadMap.UserData[key].lat, loadMap.UserData[key].lng);
-                    }
-                }
-                loadMap.Map.fitBounds(loadMap.Bounds);
-            });
-
-        },
-
-        //loadMap.Config.dataBase
-        UserEvent: function () {
-            loadMap.Database.ref("/userMarkers/" + loadMap.UserName).set({
-                name: loadMap.UserName,
-                icon: "userIcon",
-                lat: loadMap.Pos.lat,
-                lng: loadMap.Pos.lng
-            });
-        },
-
-        DrawMap : function () {
-            console.log("DrawMap")
-
-            loadMap.Map = new google.maps.Map(document.getElementById("mapgiorgi"), {
-                center: {lat: loadMap.Pos.lat, lng: loadMap.Pos.lng},
-                zoom:9
-            });
-            loadMap.Bounds = new google.maps.LatLngBounds({lat: loadMap.Pos.lat, lng: loadMap.Pos.lng});
-
-            loadMap.AddMarkerOn(loadMap.Pos.lat, loadMap.Pos.lng);
-        },
-        AddMarkerOn : function (lat, lng) {
-
-            if (lat == undefined || lng == undefined) return;
-
-            var newMarker = new google.maps.Marker({position:{lat, lng}});
-            newMarker.setMap(loadMap.Map);
-            
-            google.maps.event.addListener(newMarker,'click',function(){
-                loadMap.Map.setZoom(14);
-                loadMap.Map.setCenter(newMarker.getPosition());
-                loadMap.Map.panTo(this.getPosition());
-            });
-
-            loadMap.Bounds.extend({lat: lat, lng: lng});
-        }
-        };
-        loadMap.Database = database1;
-
-        loadMap.GetMyPos();
-
-        console.log("000000000")
-
-
-
-
-
-
-
-
-
-
+        Chat,
+        Users
     },
     created: function() {
         const currentUser = firebase.auth().currentUser;
@@ -154,18 +42,15 @@ export default {
         else {
             const userId = currentUser.uid;
             const userRef = firebase.database().ref('/users/' + userId);
-            
+            console.log('get user value');
             userRef.once('value').then((snapshot) => {
+                console.log('user snapshot came back');
                 var userObject = snapshot.val();
                 const currentUser = firebase.auth().currentUser
-                console.log('current user', currentUser);
-
-            
-
             
                 var uid = firebase.auth().currentUser.uid;
-                var userStatusDatabaseRef = firebase.database().ref('/status/' + uid);
-
+                this.userId = uid;
+                var userStatusDatabaseRef = firebase.database().ref('/users/' + uid);
                 var isOfflineForDatabase = {
                     state: 'offline',
                     last_changed: firebase.database.ServerValue.TIMESTAMP,
@@ -178,21 +63,35 @@ export default {
                     name: userObject.userName
                 };
 
-                firebase.database().ref('.info/connected').on('value', (snapshot) => {
-                    // If we're not currently connected, don't do anything.
-                    if (snapshot.val() == false) {
-                        return;
-                    };
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        var userPosition = {
+                            lng: position.coords.longitude,
+                            lat: position.coords.latitude
+                        };
+                        var userObject = snapshot.val();
+                        this.userMarker = userPosition;
+                        console.log('this.userMarker', this.userMarker);
+                        this.persistLocation(userId, userObject.userName, userPosition).then(() => {
+                            firebase.database().ref('.info/connected').on('value', (snapshot) => {
+                                // If we're not currently connected, don't do anything.
+                                if (snapshot.val() == false) {
+                                    return;
+                                };
 
-                    // If we are currently connected, then use the 'onDisconnect()' 
-                    // method to add a set which will only trigger once this 
-                    // client has disconnected by closing the app, 
-                    // losing internet, or any other means.
-                    userStatusDatabaseRef.onDisconnect().set(isOfflineForDatabase).then(function() {
-                        userStatusDatabaseRef.update(isOnlineForDatabase);
+                                // If we are currently connected, then use the 'onDisconnect()' 
+                                // method to add a set which will only trigger once this 
+                                // client has disconnected by closing the app, 
+                                // losing internet, or any other means.
+                                userStatusDatabaseRef.onDisconnect().update(isOfflineForDatabase).then(function() {
+                                    userStatusDatabaseRef.update(isOnlineForDatabase);
+                                });
+                                this.checkForOnlineUsers();
+                            });
+                        });
+                        
                     });
-                    this.checkForOnlineUsers();
-                });
+                }
             });
         }
     },
@@ -200,7 +99,10 @@ export default {
         return {
             title: 'Donde',
             showUserList: false,
-            onlineUsers: []
+            userId: '',
+            onlineUsers: [],
+            mapMarkerArray: [],
+            userMarker: null
         }
     },
     methods: {
@@ -208,13 +110,61 @@ export default {
 
         },
         checkForOnlineUsers: function() {
-            const ref = firebase.database().ref('/status/');
+            const ref = firebase.database().ref('/users/');
             ref.orderByChild('state').equalTo('online').on('child_added', (snapshot) => {
-                console.log('checkforonlineuser', snapshot.val());
-                this.onlineUsers.push(snapshot.val().name);
-                console.log('online users array', this.onlineUsers);
-            })
-        }
+                const user = snapshot.val();
+                user.id = snapshot.key;
+
+                // is current user, so go ahead and push to mapMarkerArray
+                if (snapshot.key === this.userId) {
+                    // this.userMarker = user;
+                } else {
+                    //otherwise add to list of online users
+                    this.onlineUsers.push(user);
+                }
+            });
+
+            ref.orderByChild('state').equalTo('offline').on('child_added', (snapshot) => {
+                const id = snapshot.key;
+                for (let i = 0; i < this.onlineUsers.length; i++) {
+                    if (this.onlineUsers[i].id == id) {
+                        this.onlineUsers.splice(i, 1);
+                    }
+                }
+                for (let i = 0; i < this.mapMarkerArray.length; i++) {
+                    if (this.mapMarkerArray[i].id == id) {
+                        this.mapMarkerArray.splice(i, 1);
+                    }
+                }
+            });
+        },
+        onUserSelected: function(userIndex) {
+            const userObject = this.onlineUsers[userIndex];
+            //check if user is already added to mapMarkerArray
+            for(let i = 0; i < this.mapMarkerArray.length; i++) {
+                if (userObject === this.mapMarkerArray[i]) {
+                    this.mapMarkerArray.splice(i, 1);
+                    return;
+                }
+            }
+
+            this.mapMarkerArray.push(userObject);
+        },
+        toggleUserList: function(showUserList) {
+            console.log('showUserList', showUserList);
+            if (showUserList === true) {
+                this.showUserList = true;
+            } 
+            else {
+                this.showUserList = false;
+            }
+        },
+        persistLocation: function(userId, username, position) {
+            return firebase.database().ref('/users/' + userId).update({
+                lat: position.lat,
+                lng: position.lng
+            });
+        },
     }
 }
 
@@ -225,9 +175,6 @@ export default {
 
 #navbar-column {
     padding: 0;
-}
-#map, #mapgiorgi{
-    height: 100%;
 }
 
 </style>

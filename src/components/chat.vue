@@ -141,7 +141,7 @@ body{
 
 #chat-display {
     min-height: 250px;
-    max-height:350px;
+    max-height: 350px;
     overflow: scroll;
     background-color: rgba(255, 255, 255, 0.753);
 }
