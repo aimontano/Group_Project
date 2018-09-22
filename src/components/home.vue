@@ -42,9 +42,7 @@ export default {
         else {
             const userId = currentUser.uid;
             const userRef = firebase.database().ref('/users/' + userId);
-            console.log('get user value');
             userRef.once('value').then((snapshot) => {
-                console.log('user snapshot came back');
                 var userObject = snapshot.val();
                 const currentUser = firebase.auth().currentUser
             

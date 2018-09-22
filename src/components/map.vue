@@ -79,11 +79,9 @@ export default {
                     });
                 }
                 if (this.userMarker) {
-                    console.log("bounds extended");
                     bounds.extend(this.userMarker);
                 }
                 if (this.userMarker || this.mapMarkerArray.length > 0) {
-                    console.log('bounds fit');
                     this.$refs.myMap.fitBounds(bounds);
                 }
             })

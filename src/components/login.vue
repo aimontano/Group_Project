@@ -41,19 +41,6 @@ export default {
             this.emailValue = ''
             this.passwordValue = ''
         },
-        // userExist: function(userEmail) {
-        //     const db = firebase.database();
-        //     const usersRef = db.ref('/users');
-
-        //     usersRef.orderByChild('email').equalTo(userEmail).once('child_added', snap => {
-        //         if(snap.val()){
-        //             console.log('User Exists');
-        //             this.$router.push({ path: '/main' });
-        //         } else {
-        //             console.log('User doesn\'t exist');
-        //         }
-        //     })
-        // },
         userLogin : function(e) {
             const auth = firebase.auth();
 
@@ -67,7 +54,6 @@ export default {
                 });
                 promise.then((user) => {
                     this.$router.push({ path: '/home' });
-                    console.log(user);
                 });
             } else {
                 this.userMessage = 'You must enter email & password!';
@@ -86,7 +72,7 @@ export default {
                     this.$router.push({ name: 'register', params: {email: email}});
                 });
                 promise.catch(e => {
-                    console.log(e.code);
+                    // console.log(e.code);
                     this.userMessage = e.message;
 
                 });
@@ -97,40 +83,6 @@ export default {
         }
     }
 }
-
-// const auth = firebase.auth();
-// const db = firebase.database();
-
-// const usersRef = db.ref('/users');
-
-let currentUserEmail; // stores current logged user
-
-// const userExist = userEmail => {
-	// db.ref('/users/').on('child_added', snap => {
-	
-
-	// 	if(snap.val().email == userEmail){
-	// 		console.log("user exist");
-	// 	} else {
-	// 		$('#main-content').load('./templates/register.html');
-	// 		console.log("User not registered!");
-	// 	}
-	// })
-	// usersRef.orderByChild('email').equalTo(userEmail).once('child_added', snap => {
-	// 	if(snap.val()){
-	// 		console.log("User exists");
-	// 		$('#main-content').load('./templates/profile.html', () =>{
-	// 			$('#userInfo').text(snap.val().userName + " " + snap.val().lastName);
-	// 		});
-	// 	} else {
-	// 		console.log("User doesn't exist");
-	// 	}
-	// })
-
-// }
-
-
-
 
 
 </script>
