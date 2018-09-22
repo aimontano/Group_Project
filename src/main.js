@@ -3,8 +3,10 @@ import VueRouter from 'vue-router'
 import App from './App.vue'
 import Routes from './routes'
 import * as VueGoogleMaps from 'vue2-google-maps'
+import VueChatScroll from 'vue-chat-scroll'
 
 Vue.use(VueRouter);
+Vue.use(VueChatScroll)
 
 Vue.config.productionTip = false
 
